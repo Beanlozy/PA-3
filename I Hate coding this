@@ -1,0 +1,298 @@
+# Extras:
+# Difficulty levels for Alien Duel (easy=alien stops at 15, medium=17, hard=19)
+# Session stats tracking
+# View Stats menu option to see all stats mid-game
+
+ 
+import random
+ 
+energy = 50
+mining_rounds = 0
+mining_gains = 0
+mining_losses = 0
+duel_rounds = 0
+duel_wins = 0
+duel_losses = 0
+ 
+print("There are two station games:")
+print("1. Asteroid Mining")
+print("2. Alien Duel")
+
+
+ 
+game_running = True
+while game_running:
+    if energy >= 300:
+        print("=" * 50)
+        print("CONGRATULATIONS! You have", energy, "energy crystals!")
+        print("That's enough to jumpstart your evacuation ship!")
+        print("You escaped Culverhouse Station X!")
+        print("=" * 50)
+        break
+    if energy <= 0:
+        print("=" * 50)
+        print("You have 0 energy crystals...")
+        print("THE ALIENS ATE YOU FOR BREAKFAST!")
+        print("Game Over.")
+        print("=" * 50)
+        break
+ 
+    print("-" * 50)
+    print("STATION MENU")
+    print("Energy Crystals:", energy)
+    print("-" * 50)
+    print("1. Asteroid Mining")
+    print("2. Alien Duel")
+    print("3. View Stats")
+    print("4. Exit Station")
+    print()
+    choice = input("Choose an option: ")
+ 
+    if choice == "1":
+        print()
+        print("=" * 50)
+        print("ASTEROID MINING")
+        print("=" * 50)
+        print()
+        print("Possible mining outcomes:")
+        print("  1. Earn 50 energy crystals")
+        print("  2. Randomly gain or lose 100 energy crystals")
+        print("  3. Lose 25 energy crystals")
+        print("  4. Lose ALL energy crystals")
+        print("  5. Nothing happens")
+        print()
+        session_crystals = 0
+        playing_mining = True
+        while playing_mining:
+            if energy <= 0 or energy >= 300:
+                break
+            print("Energy Crystals:", energy)
+            input("Press Enter to start mining...")
+            outcome = random.randint(1, 5)
+            if outcome == 1:
+                print("You found a rich vein! +50 energy crystals!")
+                energy = energy + 50
+                session_crystals = session_crystals + 50
+                mining_gains = mining_gains + 1
+            elif outcome == 2:
+                flip = random.randint(1, 2)
+                if flip == 1:
+                    print("Lucky strike! +100 energy crystals!")
+                    energy = energy + 100
+                    session_crystals = session_crystals + 100
+                    mining_gains = mining_gains + 1
+                else:
+                    print("Cave collapse! -100 energy crystals!")
+                    if energy >= 100:
+                        energy = energy - 100
+                        session_crystals = session_crystals - 100
+                    else:
+                        session_crystals = session_crystals - energy
+                        energy = 0
+                    mining_losses = mining_losses + 1
+            elif outcome == 3:
+                print("Unstable asteroid! -25 energy crystals!")
+                if energy >= 25:
+                    energy = energy - 25
+                    session_crystals = session_crystals - 25
+                else:
+                    session_crystals = session_crystals - energy
+                    energy = 0
+                mining_losses = mining_losses + 1
+            elif outcome == 4:
+                print("ASTEROID EXPLODED! You lost ALL your energy crystals!")
+                session_crystals = session_crystals - energy
+                energy = 0
+                mining_losses = mining_losses + 1
+            else:
+                print("Nothing happened. The asteroid was empty.")
+            mining_rounds = mining_rounds + 1
+            print("Energy Crystals:", energy)
+            print()
+            if energy <= 0 or energy >= 300:
+                break
+            again = input("Keep mining? (y/n): ").lower()
+            if again != "y":
+                playing_mining = False
+            print()
+        print()
+        print("--- Mining Session Summary ---")
+        print("Session crystals earned:", session_crystals)
+        print("Total energy crystals:", energy)
+        print()
+ 
+    elif choice == "2":
+        print()
+        print("=" * 50)
+        print("ALIEN DUEL")
+        print("=" * 50)
+        print()
+        print("Choose difficulty:")
+        print("  1. Easy (alien stops at 15)")
+        print("  2. Medium (alien stops at 17)")
+        print("  3. Hard (alien stops at 19)")
+        diff_choice = ""
+        alien_stop = 17
+        while diff_choice not in ["1", "2", "3"]:
+            diff_choice = input("Difficulty (1/2/3): ")
+            if diff_choice == "1":
+                alien_stop = 15
+            elif diff_choice == "2":
+                alien_stop = 17
+            elif diff_choice == "3":
+                alien_stop = 19
+            else:
+                print("Invalid choice. Enter 1, 2, or 3.")
+        print()
+        print("Rules:")
+        print("- Bet energy crystals on each hand")
+        print("- 10-sided dice (0-9). Rolling a 0 counts as 10.")
+        print("- You roll 2 dice to start")
+        print("- Choose to hit (roll again) or stand")
+        print("- Go over 21 = bust, you lose")
+        print("- Alien rolls after you stand (keeps rolling until", alien_stop, "or higher)")
+        print("- Alien wins all ties UNLESS you have 21 (Plasma Blast!)")
+        print()
+        session_crystals = 0
+        playing_duel = True
+        while playing_duel:
+            if energy <= 0 or energy >= 300:
+                break
+            print("Energy Crystals:", energy)
+            bet = 0
+            valid_bet = False
+            while not valid_bet:
+                bet_input = input("Enter your bet: ")
+                try:
+                    bet = int(bet_input)
+                except ValueError:
+                    print("Enter a valid number.")
+                    continue
+                if bet <= 0:
+                    print("Bet must be a positive number.")
+                elif bet > energy:
+                    print("You can't bet more than you have! (You have", energy, "crystals)")
+                else:
+                    valid_bet = True
+            print()
+            die1 = random.randint(0, 9)
+            die2 = random.randint(0, 9)
+            val1 = 10 if die1 == 0 else die1
+            val2 = 10 if die2 == 0 else die2
+            player_total = val1 + val2
+            print("You rolled:", die1, "and", die2)
+            print("(Values:", val1, "+", val2, "=", player_total, ")")
+            print()
+            player_bust = False
+            while player_total < 21:
+                hit_choice = input("Hit or Stand? (h/s): ").lower()
+                if hit_choice == "h":
+                    new_die = random.randint(0, 9)
+                    new_val = 10 if new_die == 0 else new_die
+                    player_total = player_total + new_val
+                    print("You rolled:", new_die, "(Value:", new_val, ")")
+                    print("Your total:", player_total)
+                    if player_total > 21:
+                        print("BUST! You went over 21!")
+                        player_bust = True
+                    print()
+                elif hit_choice == "s":
+                    print("You stand at", player_total)
+                    print()
+                    break
+                else:
+                    print("Enter 'h' to hit or 's' to stand.")
+            if player_total == 21 and not player_bust:
+                print("You have 21! Standing automatically.")
+                print()
+            if player_bust:
+                print("Alien doesn't even need to play. You lose", bet, "crystals.")
+                energy = energy - bet
+                session_crystals = session_crystals - bet
+                duel_losses = duel_losses + 1
+            else:
+                print("--- Alien's Turn ---")
+                a_die1 = random.randint(0, 9)
+                a_die2 = random.randint(0, 9)
+                a_val1 = 10 if a_die1 == 0 else a_die1
+                a_val2 = 10 if a_die2 == 0 else a_die2
+                alien_total = a_val1 + a_val2
+                print("Alien rolled:", a_die1, "and", a_die2, "(", a_val1, "+", a_val2, "=", alien_total, ")")
+                while alien_total < alien_stop:
+                    a_die = random.randint(0, 9)
+                    a_val = 10 if a_die == 0 else a_die
+                    alien_total = alien_total + a_val
+                    print("Alien hits:", a_die, "(Value:", a_val, ") Total:", alien_total)
+                print("Alien total:", alien_total)
+                print()
+                if alien_total > 21:
+                    print("Alien BUSTED! You win", bet, "crystals!")
+                    energy = energy + bet
+                    session_crystals = session_crystals + bet
+                    duel_wins = duel_wins + 1
+                elif player_total == 21 and alien_total == player_total:
+                    print("PLASMA BLAST! Your 21 beats the tie! You win", bet, "crystals!")
+                    energy = energy + bet
+                    session_crystals = session_crystals + bet
+                    duel_wins = duel_wins + 1
+                elif alien_total >= player_total:
+                    if alien_total == player_total:
+                        print("Tie! Alien wins ties. You lose", bet, "crystals.")
+                    else:
+                        print("Alien wins with", alien_total, "vs your", player_total, ". You lose", bet, "crystals.")
+                    energy = energy - bet
+                    session_crystals = session_crystals - bet
+                    duel_losses = duel_losses + 1
+                else:
+                    print("You win!", player_total, "vs", alien_total, ". You gain", bet, "crystals!")
+                    energy = energy + bet
+                    session_crystals = session_crystals + bet
+                    duel_wins = duel_wins + 1
+            duel_rounds = duel_rounds + 1
+            print()
+            print("Energy Crystals:", energy)
+            print()
+            if energy <= 0 or energy >= 300:
+                break
+            again = input("Play another hand? (y/n): ").lower()
+            if again != "y":
+                playing_duel = False
+            print()
+        print()
+        print("--- Duel Session Summary ---")
+        print("Session crystals earned:", session_crystals)
+        print("Total energy crystals:", energy)
+        print()
+ 
+    elif choice == "3":
+        print()
+        print("=" * 50)
+        print("SESSION STATS")
+        print("=" * 50)
+        print("Current Energy:", energy)
+        print()
+        print("Asteroid Mining:")
+        print("  Rounds played:", mining_rounds)
+        print("  Favorable outcomes:", mining_gains)
+        print("  Unfavorable outcomes:", mining_losses)
+        print()
+        print("Alien Duel:")
+        print("  Hands played:", duel_rounds)
+        print("  Wins:", duel_wins)
+        print("  Losses:", duel_losses)
+        if duel_rounds > 0:
+            win_pct = round((duel_wins / duel_rounds) * 100, 1)
+            print("  Win rate:", str(win_pct) + "%")
+        print()
+ 
+    elif choice == "4":
+        print()
+        print("Leaving Culverhouse Station X...")
+        print("Final Energy:", energy)
+        print("Thanks for playing!")
+        game_running = False
+ 
+    else:
+        print("Invalid choice. Please enter 1, 2, 3, or 4.")
+        print()
+ 
