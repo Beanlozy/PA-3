@@ -17,6 +17,7 @@ duel_losses = 0
 print("There are two station games:")
 print("1. Asteroid Mining")
 print("2. Alien Duel")
+print()
 
 
  
